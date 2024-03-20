@@ -20,9 +20,9 @@ public class WeatherStation {
 
     public String wmoCode;
 
-    public String airTemperature;
+    public double airTemperature;
 
-    public String windSpeed;
+    public double windSpeed;
 
     public String weatherPhenomenon;
     

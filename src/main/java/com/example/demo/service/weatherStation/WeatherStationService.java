@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.weatherStation;
 
 import com.example.demo.model.WeatherStation;
 import com.example.demo.repository.WeatherStationRepository;
@@ -21,7 +21,7 @@ public class WeatherStationService {
     
     private final WeatherStationRepository weatherStationRepository;
 
-    public void fetchAndSaveObservationsForCities(List<String> cities) throws IOException {
+    public void fetchAndSaveObservationsForStations(List<String> cities) throws IOException {
         Document doc = fetchWeatherData();
         Instant timestamp = parseTimestamp(doc);
         List<WeatherStation> weatherStations = parseWeatherStations(doc, cities, timestamp);
@@ -54,8 +54,8 @@ public class WeatherStationService {
     private WeatherStation createWeatherStation(Element observationElement, Instant timestamp) {
         String name = observationElement.select("name").text();
         String wmoCode = observationElement.select("wmocode").text();
-        String airTemperature = observationElement.select("airtemperature").text();
-        String windSpeed = observationElement.select("windspeed").text();
+        double airTemperature = Double.parseDouble(observationElement.select("airtemperature").text());
+        double windSpeed = Double.parseDouble(observationElement.select("windspeed").text());
         String weatherPhenomenon = observationElement.select("phenomenon").text();
 
         WeatherStation station = new WeatherStation();
