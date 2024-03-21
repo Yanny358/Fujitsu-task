@@ -26,8 +26,7 @@ public class FeeController {
             return ResponseEntity.ok(response);
             
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(new FeeCalculationResponse(
-                    "Unable to calculate fee" + e.getMessage()));
+            return ResponseEntity.badRequest().body(new FeeCalculationResponse(e.getMessage()));
         }
     }
 }
