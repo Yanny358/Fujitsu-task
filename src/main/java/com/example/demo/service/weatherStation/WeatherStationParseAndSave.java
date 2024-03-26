@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class WeatherStationService {
+public class WeatherStationParseAndSave {
     
     private final WeatherStationRepository weatherStationRepository;
 

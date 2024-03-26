@@ -15,14 +15,14 @@ import java.util.List;
 @AllArgsConstructor
 public class WeatherDataScheduler {
     
-    private WeatherStationService weatherStationService;
+    private WeatherStationParseAndSave weatherStationParseAndSave;
     private static final Logger logger = LoggerFactory.getLogger(WeatherDataScheduler.class);
 
-    @Scheduled(cron = "0 15 * * * *") 
+    @Scheduled(cron = "45 * * * * *") 
     public void fetchWeatherData() {
         List<String> targetStations = Arrays.asList("Pärnu", "Tallinn-Harku", "Tartu-Tõravere");
         try {
-            weatherStationService.fetchAndSaveObservationsForStations(targetStations);
+            weatherStationParseAndSave.fetchAndSaveObservationsForStations(targetStations);
         } catch (IOException e) {
             logger.error("Failed to fetch and save weather data", e);
         }

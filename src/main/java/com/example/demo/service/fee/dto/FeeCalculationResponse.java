@@ -18,7 +18,7 @@ public class FeeCalculationResponse {
     public FeeCalculationResponse(String errorMessage) {
         this.errorMessage = errorMessage;
     }
-    public FeeCalculationResponse(Double fee) {
+    public FeeCalculationResponse(double fee) {
         this.fee = fee;
     }
 
