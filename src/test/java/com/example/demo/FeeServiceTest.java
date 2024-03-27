@@ -79,8 +79,28 @@ public class FeeServiceTest {
 
         // Then
         assertTrue(response.isSuccess());
-        assertEquals("Fee successfully updated for TALLINN and vehicle type CAR.", response.getMessage());
+        assertEquals("Fee successfully updated. New fee is: 4.5 for TALLINN and vehicle type CAR.", response.getMessage());
         verify(cityAndVehicleFeeRepository, times(1)).save(any(CityAndVehicleFee.class));
+    }
+
+    @Test
+    void negativeNumberUpdate() {
+        // Given
+        String city = "TALLINN";
+        String vehicleType = "CAR";
+        double newFee = -4.5;
+        when(cityAndVehicleFeeRepository.findByCityAndVehicleType(city.toUpperCase(), VehicleType.CAR))
+                .thenReturn(Optional.of(new CityAndVehicleFee()));
+        when(weatherStationRepository.findLatestByStationName(anyString()))
+                .thenReturn(Optional.of(new WeatherStation()));
+
+        // When
+        FeeSavingResponse response = feeService.updateBaseFee(city, vehicleType, newFee);
+
+        // Then
+        assertFalse(response.isSuccess());
+        assertEquals("Fee must be minimum 1.", response.getMessage());
+        verify(cityAndVehicleFeeRepository, times(0)).save(any(CityAndVehicleFee.class));
     }
 
     @Test

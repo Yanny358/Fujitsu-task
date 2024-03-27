@@ -10,6 +10,7 @@ import com.example.demo.utils.VehicleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -64,7 +65,7 @@ public class FeeService {
      *
      * @param city        The city for which the fee is being updated.
      * @param vehicleType The type of vehicle as a string. This will be converted to {@link VehicleType}.
-     * @param newFee      The new fee amount to be saved.
+     * @param newFee      The new fee amount to be saved. Must be minimum 1.
      * @return {@link FeeSavingResponse} indicating the success or failure of the operation along with an appropriate message.
      */
     public FeeSavingResponse updateBaseFee(String city, String vehicleType, double newFee) {
@@ -82,6 +83,10 @@ public class FeeService {
             return new FeeSavingResponse(false, "No weather station data available for: " + city + ". It is " +
                     "not in database yet or not in supported cities: TALLINN, TARTU, PÄRNU.");
         }
+
+        if (newFee < 1) {
+            return new FeeSavingResponse(false, "Fee must be minimum 1.");
+        }
         
         city = city.toUpperCase();
         CityAndVehicleFee fee = cityAndVehicleFeeRepository.findByCityAndVehicleType(city, type)
@@ -92,8 +97,13 @@ public class FeeService {
         fee.setAmount(newFee);
         cityAndVehicleFeeRepository.save(fee);
 
-        return FeeSavingResponse.success("Fee successfully updated for " + city + " and vehicle type " + vehicleType + ".");
+        return FeeSavingResponse.success("Fee successfully updated. New fee is: " + fee.getAmount() +
+                " for " + city + " and vehicle type " + vehicleType + ".");
 
+    }
+
+    public List<CityAndVehicleFee> getAllFees() {
+        return cityAndVehicleFeeRepository.findAll();
     }
 
     private String cityNameToStationName(String cityName) {

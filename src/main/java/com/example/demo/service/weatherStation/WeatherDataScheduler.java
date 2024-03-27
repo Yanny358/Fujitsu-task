@@ -18,7 +18,7 @@ public class WeatherDataScheduler {
     private WeatherStationParseAndSave weatherStationParseAndSave;
     private static final Logger logger = LoggerFactory.getLogger(WeatherDataScheduler.class);
 
-    @Scheduled(cron = "45 * * * * *") 
+    @Scheduled(cron = "${interval-in-cron}") 
     public void fetchWeatherData() {
         List<String> targetStations = Arrays.asList("Pärnu", "Tallinn-Harku", "Tartu-Tõravere");
         try {

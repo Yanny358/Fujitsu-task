@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.model.CityAndVehicleFee;
 import com.example.demo.service.fee.FeeService;
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
 import com.example.demo.service.fee.dto.FeeSavingResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("api")
@@ -42,7 +46,7 @@ public class FeeController {
 
     /**
      * Updates the base fee for a given city and vehicle type combination.
-     * This endpoint allows update the base fee used in fee calculations for specific conditions.
+     * This endpoint allows update the base fee used in fee calculations.
      *
      * Example URL: {@code POST /api/setBaseFee/Tallinn/CAR?fee=5.0}
      *
@@ -53,8 +57,8 @@ public class FeeController {
      *         Returns CREATED status if the base fee was successfully updated, or bad request status if the operation fails (e.g., due to invalid input parameters).
      */
     @PostMapping("/setBaseFee/{city}/{vehicleType}")
-    public ResponseEntity<FeeSavingResponse> updateBaseFee(@PathVariable String city, @PathVariable String vehicleType,
-                                                        @RequestParam double fee) {
+    public ResponseEntity<FeeSavingResponse> updateBaseFee(@Valid @PathVariable String city, @PathVariable String vehicleType,
+                                                           @RequestParam double fee) {
         FeeSavingResponse response = feeService.updateBaseFee(city, vehicleType, fee);
 
         if (response.isSuccess()) {
@@ -62,5 +66,35 @@ public class FeeController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+    }
+    /**
+     * Retrieves a list of all city and vehicle fee configurations from the database.
+     * Each item in the list contains details about the city, the type of vehicle, and the corresponding fee amount.
+     *
+     * <p>Example usage:
+     * <pre>{@code
+     * GET /api/getCitiesAndFees
+     * }</pre>
+     *
+     * <p>This method does not require any request parameters. It returns a list of {@link CityAndVehicleFee} objects,
+     * each representing a fee configuration for a specific city and vehicle type. The response includes the city name,
+     * vehicle type, and the fee amount, but excludes the internal database ID for each record.
+     *
+     * <p>Response example (JSON):
+     * <pre>{@code
+     * [
+     *   {
+     *     "city": "Tallinn",
+     *     "vehicleType": "CAR",
+     *     "amount": 5.0
+     *   }
+     * ]
+     * }</pre>
+     *
+     * @return a {@link List} of {@link CityAndVehicleFee} objects representing all fee configurations available.
+     */
+    @GetMapping("/getCitiesAndFees")
+    public List<CityAndVehicleFee> getAllFees() {
+        return feeService.getAllFees();
     }
 }
