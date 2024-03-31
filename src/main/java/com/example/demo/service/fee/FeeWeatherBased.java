@@ -1,7 +1,7 @@
 package com.example.demo.service.fee;
 
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
-import com.example.demo.utils.VehicleType;
+import com.example.demo.model.enums.VehicleType;
 
 public interface FeeWeatherBased {
     FeeCalculationResponse calculate(

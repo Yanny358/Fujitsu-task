@@ -6,7 +6,7 @@ import com.example.demo.repository.CityAndVehicleFeeRepository;
 import com.example.demo.repository.WeatherStationRepository;
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
 import com.example.demo.service.fee.dto.FeeSavingResponse;
-import com.example.demo.utils.VehicleType;
+import com.example.demo.model.enums.VehicleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -99,7 +99,6 @@ public class FeeService {
 
         return FeeSavingResponse.success("Fee successfully updated. New fee is: " + fee.getAmount() +
                 " for " + city + " and vehicle type " + vehicleType + ".");
-
     }
 
     public List<CityAndVehicleFee> getAllFees() {

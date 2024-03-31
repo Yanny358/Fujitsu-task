@@ -8,13 +8,12 @@ import com.example.demo.service.fee.FeeService;
 import com.example.demo.service.fee.FeeWeatherBased;
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
 import com.example.demo.service.fee.dto.FeeSavingResponse;
-import com.example.demo.utils.VehicleType;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.demo.model.enums.VehicleType;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 
 
 import java.util.Optional;
@@ -24,6 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@DirtiesContext
 public class FeeServiceTest {
     
     @Autowired
@@ -37,12 +37,6 @@ public class FeeServiceTest {
 
     @MockBean
     private WeatherStationRepository weatherStationRepository;
-
-    @BeforeEach
-    void setUp() {
-        Mockito.reset(cityAndVehicleFeeRepository, weatherStationRepository);
-    }
-
 
     @Test
     void unsupportedCity() {

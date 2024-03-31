@@ -22,7 +22,6 @@ public class FeeController {
     /**
      * Calculates the fee based on the specified city and vehicle type, considering current weather conditions.
      * The fee calculation takes into account air temperature, wind speed, and weather phenomena to adjust the base fee dynamically.
-     *
      * Example URL: {@code GET /api/calculateFee/Tallinn/CAR}
      *
      * @param city the city for which the fee calculation is requested (e.g., "Tallinn").
@@ -47,7 +46,6 @@ public class FeeController {
     /**
      * Updates the base fee for a given city and vehicle type combination.
      * This endpoint allows update the base fee used in fee calculations.
-     *
      * Example URL: {@code POST /api/setBaseFee/Tallinn/CAR?fee=5.0}
      *
      * @param city the city for which the base fee is being set (e.g., "Tallinn").
@@ -56,13 +54,13 @@ public class FeeController {
      * @return a {@link ResponseEntity} containing a {@link FeeSavingResponse} indicating the success or failure of the operation.
      *         Returns CREATED status if the base fee was successfully updated, or bad request status if the operation fails (e.g., due to invalid input parameters).
      */
-    @PostMapping("/setBaseFee/{city}/{vehicleType}")
+    @PutMapping("/setBaseFee/{city}/{vehicleType}")
     public ResponseEntity<FeeSavingResponse> updateBaseFee(@Valid @PathVariable String city, @PathVariable String vehicleType,
                                                            @RequestParam double fee) {
         FeeSavingResponse response = feeService.updateBaseFee(city, vehicleType, fee);
 
         if (response.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }

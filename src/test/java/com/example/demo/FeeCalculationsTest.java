@@ -4,7 +4,7 @@ import com.example.demo.model.CityAndVehicleFee;
 import com.example.demo.repository.CityAndVehicleFeeRepository;
 import com.example.demo.service.fee.FeeWeatherBased;
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
-import com.example.demo.utils.VehicleType;
+import com.example.demo.model.enums.VehicleType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

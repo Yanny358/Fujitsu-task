@@ -1,4 +1,4 @@
-package com.example.demo.utils;
+package com.example.demo.model.enums;
 
 public enum VehicleType {
     CAR,

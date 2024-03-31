@@ -14,8 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(FeeController.class)
@@ -85,8 +84,8 @@ public class FeeControllerTest {
         FeeSavingResponse mockResponse = FeeSavingResponse.success("Fee successfully updated for TALLINN and vehicle type CAR.");
         when(feeService.updateBaseFee("TALLINN", "CAR", 5.0)).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/setBaseFee/TALLINN/CAR?fee=5.0"))
-                .andExpect(status().isCreated())
+        mockMvc.perform(put("/api/setBaseFee/TALLINN/CAR?fee=5.0"))
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Fee successfully updated for TALLINN and vehicle type CAR."));
     }
@@ -96,7 +95,7 @@ public class FeeControllerTest {
         FeeSavingResponse mockResponse = FeeSavingResponse.failure("Invalid vehicle type: BOAT");
         when(feeService.updateBaseFee("TALLINN", "BOAT", 5.0)).thenReturn(mockResponse);
 
-        mockMvc.perform(post("/api/setBaseFee/TALLINN/BOAT?fee=5.0"))
+        mockMvc.perform(put("/api/setBaseFee/TALLINN/BOAT?fee=5.0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Invalid vehicle type: BOAT"));

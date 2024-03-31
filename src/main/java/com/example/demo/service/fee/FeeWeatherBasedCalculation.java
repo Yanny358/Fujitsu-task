@@ -1,14 +1,19 @@
 package com.example.demo.service.fee;
 
 import com.example.demo.model.CityAndVehicleFee;
+import com.example.demo.model.PhenomenonExtraFee;
+import com.example.demo.model.TemperatureExtraFee;
+import com.example.demo.model.WindExtraFee;
 import com.example.demo.repository.CityAndVehicleFeeRepository;
+import com.example.demo.repository.PhenomenonExtraFeeRepository;
+import com.example.demo.repository.TemperatureExtraFeeRepository;
+import com.example.demo.repository.WindExtraFeeRepository;
 import com.example.demo.service.fee.dto.FeeCalculationResponse;
-import com.example.demo.utils.VehicleType;
+import com.example.demo.model.enums.VehicleType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,6 +25,10 @@ import java.util.Optional;
 public class FeeWeatherBasedCalculation implements FeeWeatherBased {
 
     private final CityAndVehicleFeeRepository cityAndVehicleFeeRepository;
+    private final PhenomenonExtraFeeRepository phenomenonExtraFeeRepository;
+    private final TemperatureExtraFeeRepository temperatureExtraFeeRepository;
+    private final WindExtraFeeRepository windExtraFeeRepository;
+
 
     /**
      * Calculates the fee based on air temperature, wind speed, weather phenomenon, city, and vehicle type.
@@ -27,10 +36,10 @@ public class FeeWeatherBasedCalculation implements FeeWeatherBased {
      * Otherwise, it adjusts the fee based on weather conditions.
      *
      * @param airTemperature the current air temperature
-     * @param windSpeed the current wind speed
-     * @param phenomenon the current weather phenomenon
-     * @param city the city for which the fee is being calculated
-     * @param vehicleType the type of vehicle for which the fee is being calculated
+     * @param windSpeed      the current wind speed
+     * @param phenomenon     the current weather phenomenon
+     * @param city           the city for which the fee is being calculated
+     * @param vehicleType    the type of vehicle for which the fee is being calculated
      * @return a {@link FeeCalculationResponse} containing the calculated fee or an error message
      */
     @Override
@@ -58,63 +67,42 @@ public class FeeWeatherBasedCalculation implements FeeWeatherBased {
 
     private FeeCalculationResponse calculateWeatherAdjustments(double airTemperature, double windSpeed, String phenomenon, VehicleType vehicleType) {
         double adjustment = 0;
-        if (vehicleType == VehicleType.BIKE) {
-            if (windSpeed >= 10.0 && windSpeed <= 20.0) adjustment += 0.5;
-            if (windSpeed > 20.0) {
-                return new FeeCalculationResponse("Usage of selected vehicle type is forbidden");
-            }
-        }
-        if (vehicleType == VehicleType.SCOOTER || vehicleType == VehicleType.BIKE) {
-            if (airTemperature < -10.0) adjustment += 1.0;
-            if (airTemperature >= -10.0 && airTemperature <= 0) adjustment += 0.5;
 
-            boolean hasSnow = phenomenon.contains("snow");
-            boolean hasSleet = phenomenon.contains("sleet");
-            boolean hasRain = phenomenon.contains("rain");
-            // Only consider shower if snow hasn't been detected. Real cases: 'Light snow shower' 'Light shower'
-            boolean hasShower = phenomenon.contains("shower") && !hasSnow;
-            if (hasSnow || hasSleet) adjustment += 1;
-            if (hasRain || hasShower) adjustment += 0.5;
-            if (phenomenon.contains("Glaze") || phenomenon.contains("Hail") || phenomenon.contains("Thunder")) {
-                return new FeeCalculationResponse("Usage of selected vehicle type is forbidden");
+        List<TemperatureExtraFee> temperatureExtraFees = temperatureExtraFeeRepository.findAll();
+        List<WindExtraFee> windExtraFees = windExtraFeeRepository.findAll();
+        List<PhenomenonExtraFee> phenomenonExtraFees = phenomenonExtraFeeRepository.findAll();
+
+        for (TemperatureExtraFee extraFee : temperatureExtraFees) {
+            if ((vehicleType == VehicleType.SCOOTER || vehicleType == VehicleType.BIKE) &&
+                    airTemperature >= extraFee.getMinValue() && airTemperature <= extraFee.getMaxValue()) {
+                adjustment += extraFee.getAdjustmentAmount();
             }
         }
+        
+        for (WindExtraFee extraFee : windExtraFees) {
+            if (vehicleType == VehicleType.BIKE) {
+                if (windSpeed >= extraFee.getMinValue() && windSpeed <= extraFee.getMaxValue()) {
+                    adjustment += extraFee.getAdjustmentAmount();
+                } else if (windSpeed > extraFee.getMaxValue()) {
+                    return new FeeCalculationResponse("Usage of selected vehicle type is forbidden");
+                }
+            }
+        }
+
+        for (PhenomenonExtraFee extraFee : phenomenonExtraFees) {
+            if ((vehicleType == VehicleType.SCOOTER || vehicleType == VehicleType.BIKE) &&
+                    phenomenon.equalsIgnoreCase(extraFee.getName())) {
+                adjustment += extraFee.getAdjustmentAmount();
+            }
+        }
+
+        if ((vehicleType == VehicleType.SCOOTER || vehicleType == VehicleType.BIKE) &&
+                (phenomenon.contains("Glaze") || phenomenon.contains("Hail") || phenomenon.contains("Thunder"))) {
+            return new FeeCalculationResponse("Usage of selected vehicle type is forbidden");
+        }
+
         return new FeeCalculationResponse(adjustment);
     }
 
-    /**
-     * Populates the database with default fees for all supported city and vehicle type combinations.
-     * This method is intended to be called during application initialization to ensure that the database contains all necessary default fee data.
-     */
-    public void saveDefaultFees() {
-        Map<String, Map<VehicleType, Double>> defaultFees = getDefaultFees();
-
-        defaultFees.forEach((city, vehicleTypeMap) -> vehicleTypeMap.forEach((vehicleType, fee) -> {
-            CityAndVehicleFee cityAndVehicleFee = new CityAndVehicleFee();
-            cityAndVehicleFee.setCity(city);
-            cityAndVehicleFee.setVehicleType(vehicleType);
-            cityAndVehicleFee.setAmount(fee);
-            cityAndVehicleFeeRepository.save(cityAndVehicleFee);
-        }));
-    }
-
-    private Map<String, Map<VehicleType, Double>> getDefaultFees() {
-        Map<String, Map<VehicleType, Double>> defaultFees = new HashMap<>();
-
-        defaultFees.put("TALLINN", Map.of(
-                VehicleType.CAR, 4.0,
-                VehicleType.SCOOTER, 3.5,
-                VehicleType.BIKE, 3.0));
-        defaultFees.put("TARTU", Map.of(
-                VehicleType.CAR, 3.5,
-                VehicleType.SCOOTER, 3.0,
-                VehicleType.BIKE, 2.5));
-        defaultFees.put("PÄRNU", Map.of(
-                VehicleType.CAR, 3.0,
-                VehicleType.SCOOTER, 2.5,
-                VehicleType.BIKE, 2.0));
-
-        return defaultFees;
-    }
-
 }
+    
